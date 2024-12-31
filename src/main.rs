@@ -9,18 +9,29 @@ impl Interpreter {
     pub fn eval(&mut self, s: String) {
         let lines = s.split("\n").filter(|el| el.trim() != ""); 
         for line in lines {
+            //TODO: Find EOF and exit with 0
+            // std::process::exit(0);
             let [name, sign, expr]: [&str; 3] = line.splitn(3, ' ').collect::<Vec<&str>>().try_into().unwrap();
 
             if name == "//" {
                 continue;
             }
 
+            // println!("name: {name}");
+            // println!("sign: {sign}");
+            // println!("expr: {expr}");
+
             if sign == "=" {
                 let result: String = self.eval_expression(expr).to_string();
                 self.vars.insert(String::from(name), result);
+                if let Some(val) = self.vars.get(&String::from(name)) {
+                    println!("{name}: {val}")
+                }
+                
                 continue;
             }
 
+            // println!("result expr: {expr}");
             println!("{}", self.eval_expression(expr).to_string());
         }
     }
@@ -32,12 +43,15 @@ impl Interpreter {
         let tokens = s.split(" ");
 
         for token in tokens {
-            if token.parse::<f64>().is_ok() {
-                stack.push(token.parse::<f64>().unwrap_or_else(|err| panic!("{err}")));
+            if let Ok(value) = token.parse::<f64>() {
+                stack.push(value);
                 continue;
-            } else if self.vars.get(token).is_some() {
-                stack.push(self.vars.get(token).unwrap().parse::<f64>().unwrap_or_default());
-                continue;
+            } else if let Some(value) = self.vars.get(&String::from(token)) {
+                if let Ok(num) = value.parse::<f64>() {
+                    // println!("expr {token}: {value}");
+                    stack.push(num);
+                    continue;
+                }
             }
             match token {
                 "+" => {
