@@ -9,8 +9,6 @@ impl Interpreter {
     pub fn eval(&mut self, s: String) {
         let lines = s.split("\n").filter(|el| el.trim() != ""); 
         for line in lines {
-            //TODO: Find EOF and exit with 0
-            // std::process::exit(0);
             let [name, sign, expr]: [&str; 3] = line.splitn(3, ' ').collect::<Vec<&str>>().try_into().unwrap();
 
             if name == "//" {
@@ -24,15 +22,15 @@ impl Interpreter {
             if sign == "=" {
                 let result: String = self.eval_expression(expr).to_string();
                 self.vars.insert(String::from(name), result);
-                if let Some(val) = self.vars.get(&String::from(name)) {
-                    println!("{name}: {val}")
-                }
+                // if let Some(val) = self.vars.get(&String::from(name)) {
+                //     println!("{name}: {val}")
+                // }
                 
                 continue;
             }
 
             // println!("result expr: {expr}");
-            println!("{}", self.eval_expression(expr).to_string());
+            println!("{}", self.eval_expression(line).to_string());
         }
     }
 
@@ -101,7 +99,7 @@ impl Interpreter {
         let left  = stack.pop();
 
         if left.is_none() && right.is_none() {
-            panic!("You done fucked up boii! You ain't got enough operators!");
+            panic!("You done fucked up boii! You ain't got enough operands!");
         }
 
         let left  = left.unwrap_or_default();
